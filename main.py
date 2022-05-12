@@ -5,12 +5,6 @@ import math
 
 from matplotlib import pyplot as plt
 from sklearn.naive_bayes import GaussianNB
-from sklearn.decomposition import PCA
-
-# UNNECESSARY
-# def eucl_distance(a, b):  # sqrt((x-xo)**2 + (y-yo)**2)
-#     return math.sqrt(math.pow((a[0] - b[0]), 2) + math.pow((a[1] - b[1]), 2))
-from sklearn.preprocessing import StandardScaler
 
 """
 
@@ -31,53 +25,6 @@ def eucl_distance2(a, b):
     return math.sqrt(sum)
 
 
-# UNNECESSARY
-# works just fine for 2 features
-# def maximin(data, clusters):
-#     created_clusters = [data[0].tolist()]  # append to the result the first data_sample
-#     distances = []
-#     for i in range(np.size(data, 0)):
-#         distances.append(eucl_distance(data[i], data[0]))
-#
-#     max_index = distances.index(max(distances))
-#     created_clusters.append(data[max_index].tolist())  # append the furthest data_sample from the initial data_sample
-#
-#     no_cluster = 2
-#
-#     while no_cluster < clusters:
-#         distances = []
-#
-#         for i in range(len(created_clusters)):
-#             dist_i = []
-#             for j in range(np.size(data, 0)):
-#                 if created_clusters[i][0] != data[j][0] and created_clusters[i][1] != data[j][1]:
-#                     dist_i.append(eucl_distance(created_clusters[i], data[j]))
-#
-#             minimum = min(dist_i)
-#             distances.append(minimum)
-#
-#         max_index = distances.index(max(distances))
-#         created_clusters.append(data[max_index].tolist())
-#         no_cluster += 1
-#
-#     return created_clusters
-
-
-# UNNECESSARY
-
-# def min_non_zero(distances):
-#     i=0
-#     while distances[i] == 0:
-#         i+=1
-#
-#     min = distances[i]
-#     for j in range(len(distances)):
-#         if distances[j] < min and distances[j]!=0:
-#             min = distances[j]
-#
-#     return min
-
-
 """
 
 Maximin working for samples with more than 2 dimensions
@@ -92,7 +39,6 @@ and I continued calculating centers based on manhattan distances,
 until the point that I have created as many centers as requested.
 
 """
-
 
 
 def maximin2(data, num_of_centers):
@@ -141,16 +87,6 @@ def is_equal(a, b):
     return True
 
 
-# def new_centroid(data, list1):
-#     n = len(list1)
-#     sum_x = 0
-#     sum_y = 0
-#     for i in range(n):
-#         sum_x += data[list1[i]][0]
-#         sum_y += data[list1[i]][1]
-#
-#     return [sum_x / n, sum_y / n]
-
 """
 The purpose is to create a new center of V dimensions. 
 This center is the average of all the points in a cluster.
@@ -170,43 +106,6 @@ def new_centroid2(data, clusteri):
 
     return [x / n for x in sums]
 
-
-# def k_means(data, centroids):
-#     clusters = []
-#     dists_i_from_centroids = []
-#     new_centroids = []
-#
-#     for i in range(len(centroids)):
-#         new_centroids.append([0, 0])
-#
-#     while not is_equal(centroids, new_centroids):
-#         clusters = []
-#         for i in range(len(centroids)):
-#             clusters.append([])
-#
-#         for i in range(np.size(data, 0)):
-#             for j in range(len(centroids)):  # for each point calculate as many distances as there are centroids
-#                 dists_i_from_centroids.append(eucl_distance(data[i], centroids[j]))  # array size = len(centroids)
-#
-#             min_index = dists_i_from_centroids.index(min(dists_i_from_centroids))
-#             clusters[min_index].append(i)
-#             dists_i_from_centroids = []
-#
-#         # up until this point I have a list of lists of pointers (clusters) = [ [0, 1, 6, 9], [...], [...], [...] ]
-#         #                                                                             0         1      2      3
-#         # each subarray representing a cluster
-#
-#         new_centroids = centroids[:]
-#         a = []
-#         for i in range(len(clusters)):
-#             if len(clusters[i]) != 0:
-#                 a.append(new_centroid(data, clusters[i]))
-#             else:
-#                 a.append(centroids[i])
-#
-#         centroids = a[:]
-#
-#     return clusters, centroids
 
 """
 Implemented a variation of the Kmeans algorithm.
@@ -313,42 +212,26 @@ Code that implements Principal Component Analysis
 
 
 def pca2(X, num_components):
-    # Step-1
-    X_meaned = X - np.mean(X, axis=0)
 
-    # Step-2
-    cov_mat = np.cov(X_meaned, rowvar=False)
+    X_meaned = X - np.mean(X, axis=0)  # subtracting the mean of each variable
+    cov_mat = np.cov(X_meaned, rowvar=False)    # calculating the covariance matrix
+    eigen_values, eigen_vectors = np.linalg.eigh(cov_mat)   # computing the eigenvalues and eigenvectors
 
-    # Step-3
-    eigen_values, eigen_vectors = np.linalg.eigh(cov_mat)
-
-    # Step-4
-    sorted_index = np.argsort(eigen_values)[::-1]
-    sorted_eigenvalue = eigen_values[sorted_index]
+    sorted_index = np.argsort(eigen_values)[::-1]  # sorting the arrays in descending order
     sorted_eigenvectors = eigen_vectors[:, sorted_index]
-
-    # Step-5
     eigenvector_subset = sorted_eigenvectors[:, 0:num_components]
-
-    # Step-6
+    # Transforming the data
     X_reduced = np.dot(eigenvector_subset.transpose(), X_meaned.transpose()).transpose()
 
     return X_reduced
 
 
-
-def pca(X, n_dim):
-    means = np.mean(X, axis=0)
-    X = X - means
-    square_m = np.dot(X.T, X)
-    (evals, evecs) = np.linalg.eig(square_m)
-    result = np.dot(X, evecs[:, 0:n_dim])
-    return result
-
 """
 converts [samples x 28 x 28] arrays to
                 [samples x 784] array
 """
+
+
 # REALYYYY SLOWWW
 def multi_to_one(X):
     Y = []
@@ -447,7 +330,9 @@ def plotting_4_1(samples, X_pca):
 
 # --------------------------------------------------------------------------------------
 
-
+print('-----------EXECUTION TIME on i7- 5500u and no Cuda cores (No GPU):  10 minutes 3 seconds ')
+print()
+print()
 print("-EXERCISE 1.   Import the Dataframe. Select classes 1,3,7,9")
 
 """
@@ -549,7 +434,8 @@ plotting_3_and_4_2(m, clusters)
 print()
 print()
 
-print("-EXERCISE 4. Converting X_train, to X_train2 array, with the dimensions of 25087 x 784. Then, perform  PCA on X_train2, for V=2, 25, 50, 100. ")
+print(
+    "-EXERCISE 4. Converting X_train, to X_train2 array, with the dimensions of 25087 x 784. Then, perform  PCA on X_train2, for V=2, 25, 50, 100. ")
 print()
 # transforming MNIST X_train data from [samples,28,28] format
 #                                        to [samples,784] format
@@ -557,7 +443,6 @@ print()
 print('Initial dimensions of X_train: ', X_train.shape)
 print('We want to transform this to [samples, 784]')
 print('*this may take a while*')
-
 
 X_train2 = np.array(multi_to_one(X_train[0]))
 labels[0] = Y_train[0]
@@ -582,7 +467,7 @@ print()
 # 0.7472794674532627
 
 
-V = [2, 25, 50, 100]        # V = [2, 25, 50, 100]
+V = [2, 25, 50, 100]  # V = [2, 25, 50, 100]
 for i in V:
     print("Performing PCA for V=", i, "...")
     # pca = PCA(i)
@@ -602,8 +487,6 @@ for i in V:
 
     print()
 
-
-
 print()
 print()
 print("-EXERCISE 5. Implementing Naive Bayes Classifier for V = Vmax = 25")
@@ -619,13 +502,17 @@ for i in range(1, test_samples):
 
 print('X_test dimensions: ', X_test2.shape)
 
-pca = PCA(25)
+# pca = PCA(25)
+# X_test_pca = pca.fit_transform(X_test2)
 
-X_test_pca = pca.fit_transform(X_test2)
+X_test_pca = pca2(X_test2, 25)
+
 print("xpca_test shape: ", X_test_pca.shape)
 print('test-labels shape: ', test_labels.shape)
 
-X_pca = pca.fit_transform(X_train2)
+# X_pca = pca.fit_transform(X_train2)
+X_pca = pca2(X_train2, 25)
+
 gnb = GaussianNB()
 y_pred = gnb.fit(X_pca, labels.ravel()).predict(X_test_pca)
 
@@ -638,4 +525,3 @@ for i in range(X_test_pca.shape[0]):
 print('mislabeled counts: ', count_mislabeled)
 
 print("model's accuracy is: ", (X_test_pca.shape[0] - count_mislabeled) / X_test_pca.shape[0])
-
